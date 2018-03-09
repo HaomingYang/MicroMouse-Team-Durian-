@@ -2,14 +2,15 @@
 
 #include <VL6180X.h>
 #include <Wire.h>
+#include <PID_v1.h>
 
 // Invert encoder directions if needed
-const boolean INVERT_ENCODER_LEFT = false;
-const boolean INVERT_ENCODER_RIGHT = false;
+const boolean INVERT_ENCODER_LEFT = true;
+const boolean INVERT_ENCODER_RIGHT = true;
 
 // Invert motor directions if needed
 const boolean INVERT_MOTOR_LEFT = false;
-const boolean INVERT_MOTOR_RIGHT = false;
+const boolean INVERT_MOTOR_RIGHT = true;
 
 // Loop count, used for print statements
 int count = 0;
@@ -21,9 +22,22 @@ float left_dist;
 float right_dist;
 float center_dist;
 
+// PID control
+double v, u_lin, u_ang, error, v_sp;
+double P = .1;
+double I = .2;
+double D = .3;
+PID linPID(&v, &u_lin, &v_sp, P, I, D, DIRECT); 
+PID angPID(&error, &u_ang, 0, P, I, D, DIRECT); 
+
+
 void setup() {
   Serial.begin(9600);
   hardwareSetup();
+  v_sp = 100;
+  error = 0;
+  linPID.SetMode(AUTOMATIC);
+  angPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
@@ -38,12 +52,14 @@ void loop() {
   ////////////////////////////////////
   // Your changes should start here //
   ////////////////////////////////////
+  error = velocity_angular;
+  v = velocity_linear;
 
-  float left_power = 0.2;
-  float right_power = 0.2;
-
-  applyPowerLeft(left_power);
-  applyPowerRight(right_power);
+  linPID.Compute();
+  angPID.Compute();
+  
+  applyPowerLeft(1.0);
+  applyPowerRight(1.0);
 
   // Print debug info every 500 loops
   if (count % 500 == 0) {
@@ -57,9 +73,15 @@ void loop() {
     Serial.print(" ");
     Serial.print(right_dist);
     Serial.println();
+    Serial.print(u_ang);
+    Serial.println();
+    Serial.print(u_lin);
+    Serial.println();
   }
   count++;
 
   checkEncodersZeroVelocity();
   updateDistanceSensors();
 }
+
+

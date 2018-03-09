@@ -252,3 +252,4 @@ void configureDistanceSensor(VL6180X* sensor, uint8_t addr) {
   sensor->stopContinuous();
   sensor->startRangeContinuous(100);
 }
+
