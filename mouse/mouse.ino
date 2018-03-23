@@ -4,12 +4,12 @@
 #include <Wire.h>
 
 // Invert encoder directions if needed
-const boolean INVERT_ENCODER_LEFT = false;
-const boolean INVERT_ENCODER_RIGHT = false;
+const boolean INVERT_ENCODER_LEFT = true;
+const boolean INVERT_ENCODER_RIGHT = true;
 
 // Invert motor directions if needed
 const boolean INVERT_MOTOR_LEFT = false;
-const boolean INVERT_MOTOR_RIGHT = false;
+const boolean INVERT_MOTOR_RIGHT = true;
 
 // Loop count, used for print statements
 int count = 0;
@@ -40,21 +40,22 @@ void loop() {
   ////////////////////////////////////
 
   float left_power = 0.2;
-  float right_power = 0.2;
+  float right_power = 0.7;
 
   applyPowerLeft(left_power);
   applyPowerRight(right_power);
 
   // Print debug info every 500 loops
   if (count % 500 == 0) {
+    Serial.print(" vlin");
     Serial.print(velocity_linear / 100.0);
-    Serial.print(" ");
+    Serial.print(" vang");
     Serial.print(velocity_angular);
-    Serial.print(" ");
+    Serial.print(" ldist");
     Serial.print(left_dist);
-    Serial.print(" ");
+    Serial.print(" cdist");
     Serial.print(center_dist);
-    Serial.print(" ");
+    Serial.print(" rdist");
     Serial.print(right_dist);
     Serial.println();
   }
