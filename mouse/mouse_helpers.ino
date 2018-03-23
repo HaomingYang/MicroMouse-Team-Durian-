@@ -138,6 +138,7 @@ void checkEncodersZeroVelocity(void) {
   }
 }
 
+
 void leftEncoderRisingEdge(void) {
   unsigned long curr_time = micros();
 
@@ -156,6 +157,7 @@ void leftEncoderRisingEdge(void) {
   }
 
   prev_pulse_time_left = curr_time;
+    
 }
 
 void rightEncoderRisingEdge(void) {
@@ -176,6 +178,7 @@ void rightEncoderRisingEdge(void) {
   }
 
   prev_pulse_time_right = curr_time;
+
 }
 
 ////////////////////////////////
