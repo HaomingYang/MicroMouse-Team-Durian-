@@ -39,8 +39,8 @@ void loop() {
   // Your changes should start here //
   ////////////////////////////////////
 
-  float left_power = 0.3;
-  float right_power = 0.3;
+  float left_power = 0.7;
+  float right_power = 0.7;
 
   float u_current = u(sr_error),
         pleft = left_power + u_current,
@@ -54,6 +54,7 @@ void loop() {
 
   // Print debug info every 500 loops
   if (count % 500 == 0) {
+    /*
     Serial.print(" vlin");
     Serial.print(velocity_linear / 100.0);
     Serial.print(" vang");
@@ -66,11 +67,10 @@ void loop() {
     Serial.print(right_dist);
     Serial.print(" ucurr");
     Serial.print(u_current);
-    Serial.print(" pl");
-    Serial.print(pleft);
-    Serial.print(" pr");
-    Serial.print(pright);
-    
+    */
+
+    if(millis()> 1000)
+      Serial.print(velocity_angular);
     Serial.println();
 
   }
@@ -81,6 +81,8 @@ void loop() {
   setlight();
 }
 
+//va+ = blue
+//va- = yellow
 void setlight()
 {
   if(sr_error() < 0)
@@ -95,24 +97,37 @@ void setlight()
   }
 
 }
+
+
 //u(t)
 //return:
 //- : add power to right engine, turn left
 //+ : add power to left engine, turn right
+
+const float P = 0.05, I = 0, D = 0.01;
+const unsigned long MIN_FIX_INTERVAL = 100;
+
 float u(float (*err_f)())
 {
-  static float current_correction_rate = 0.0;
+  static float current_correction_rate = 0.0, last_error = sr_error();
   
   static unsigned long last_fix = 0;
   unsigned long current_time;
   
   current_time = millis();
+  float error = sr_error();
+  
   if(current_time - last_fix > 100){
-    current_correction_rate += sr_error() * 0.005;
+    /* update current correction rate */
+
+    float pfix = P * error,
+          dfix = D * (error - last_error);
+    current_correction_rate += pfix + dfix;
+
+    last_error = error;
     last_fix = current_time;
   }
-
-
+  
   return current_correction_rate;
 }
 
@@ -121,5 +136,5 @@ float u(float (*err_f)())
 //+: need to go right
 float sr_error()
 {
-  return velocity_angular+0.15;
+  return velocity_angular;
 }
