@@ -24,10 +24,10 @@ float center_dist;
 
 // PID control
 double v, u_lin, u_ang, error, v_sp;
-double zero = 0;
-double P = .242;
-double I = 0.009;
-double D = 0.0012;
+double zero = -0.366666;
+double P = 0.25;
+double I = 0.0032;
+double D = 0.0003;
 PID linPID(&v, &u_lin, &v_sp, P, I, D, DIRECT);
 PID angPID(&error, &u_ang, &zero, P, I, D, DIRECT);
 
@@ -62,11 +62,11 @@ void loop() {
   linPID.Compute();
   angPID.Compute();
 
-  applyPowerLeft(.5 - u_ang);
-  applyPowerRight(.5 + u_ang);
+  applyPowerLeft(.25 - u_ang);
+  applyPowerRight(.25 + u_ang);
 
   // Print debug info every 500 loops
-  if (count % 500 == 0) {
+  if (count % 50 == 0 && millis() > 1000) {
     // Serial.print(" V: ");
     // Serial.print(velocity_linear / 100.0);
     Serial.print(" V_A: ");
