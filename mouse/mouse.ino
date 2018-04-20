@@ -23,24 +23,23 @@ float right_dist;
 float center_dist;
 
 // PID control
-double v, u_lin, u_ang, error, v_sp;
-double zero = -0.366666;
+double u_ang, error;
+double zero = -0.43434343434;
 double P = 0.25;
 double I = 0.0032;
 double D = 0.0003;
-PID linPID(&v, &u_lin, &v_sp, P, I, D, DIRECT);
 PID angPID(&error, &u_ang, &zero, P, I, D, DIRECT);
 
+// delay
+int r_count = 0;
+int l_count = 0;
 
 void setup() {
   Serial.begin(9600);
   hardwareSetup();
-  v_sp = 100;
   error = 0;
   angPID.SetOutputLimits(-1.0, 1.0);
   angPID.SetSampleTime(10);
-  linPID.SetOutputLimits(0, 1.0);
-  linPID.SetMode(AUTOMATIC);
   angPID.SetMode(AUTOMATIC);
 }
 
@@ -56,27 +55,42 @@ void loop() {
   ////////////////////////////////////
   // Your changes should start here //
   ////////////////////////////////////
-  error = velocity_angular;
-  v = velocity_linear;
+  
+  if (right_dist > 22.0) {
+    r_count++;
+    if (r_count > 850)
+      right_dist *= 1.7;
+  } else if (r_count > 0) {
+    right_dist *= 1.7;
+    r_count--;
+  }
+  if (left_dist > 22.0) {
+    if (l_count > 850)
+      left_dist *= 1.7;
+    l_count++;
+  } else if (r_count > 0) {
+    left_dist *= 1.7;
+    l_count--;
+  }
+  error = velocity_angular + right_dist / 5.0 - left_dist / 5.0;
 
-  linPID.Compute();
   angPID.Compute();
 
-  applyPowerLeft(.25 - u_ang);
-  applyPowerRight(.25 + u_ang);
+  applyPowerLeft((center_dist - 2.0) / 100 - u_ang);
+  applyPowerRight((center_dist - 2.0) / 100 + u_ang);
 
   // Print debug info every 500 loops
-  if (count % 50 == 0 && millis() > 1000) {
+  if (count % 500 == 0 && millis() > 1000) {
     // Serial.print(" V: ");
     // Serial.print(velocity_linear / 100.0);
     Serial.print(" V_A: ");
     Serial.print(error);
-    // Serial.print(" LEFT: ");
-    // Serial.print(left_dist);
-    // Serial.print(" CENTER: ");
-    // Serial.print(center_dist);
-    // Serial.print(" RIGHT: ");
-    // Serial.print(right_dist);
+    Serial.print(" LEFT: ");
+    Serial.print(left_dist);
+    Serial.print(" CENTER: ");
+    Serial.print(center_dist);
+    Serial.print(" RIGHT: ");
+    Serial.print(right_dist);
     Serial.print(" CRCTION: ");
     Serial.print(u_ang);
     Serial.println();
