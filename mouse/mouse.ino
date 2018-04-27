@@ -26,13 +26,14 @@ float center_dist;
 double u_ang, error;
 double zero = -0.43434343434;
 double P = 0.25;
-double I = 0.0032;
+double I = 0.0;
 double D = 0.0003;
 PID angPID(&error, &u_ang, &zero, P, I, D, DIRECT);
 
 // delay
 int r_count = 0;
 int l_count = 0;
+int c_count = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -55,24 +56,29 @@ void loop() {
   ////////////////////////////////////
   // Your changes should start here //
   ////////////////////////////////////
-  
+
   if (right_dist > 22.0) {
-    r_count++;
-    if (r_count > 850)
-      right_dist *= 1.7;
-  } else if (r_count > 0) {
-    right_dist *= 1.7;
-    r_count--;
+    r_count = 1;
   }
   if (left_dist > 22.0) {
-    if (l_count > 850)
-      left_dist *= 1.7;
-    l_count++;
-  } else if (r_count > 0) {
-    left_dist *= 1.7;
-    l_count--;
+    l_count = 1;
   }
-  error = velocity_angular + right_dist / 5.0 - left_dist / 5.0;
+  if (center_dist < 15.5) {
+    c_count = 1;
+  }
+  if (c_count && l_count) {
+    left_dist += 100;
+  }
+  if (c_count && r_count) {
+    right_dist += 100;
+  }
+  if (c_count && center_dist > 18) {
+    c_count = 0;
+    l_count = 0;
+    r_count = 0;
+  }
+
+  error = velocity_angular + right_dist / 5.5 - left_dist / 5.5;
 
   angPID.Compute();
 

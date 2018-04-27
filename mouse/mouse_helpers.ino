@@ -157,7 +157,7 @@ void leftEncoderRisingEdge(void) {
   }
 
   prev_pulse_time_left = curr_time;
-    
+
 }
 
 void rightEncoderRisingEdge(void) {
